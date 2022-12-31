@@ -1,41 +1,32 @@
 import sys
-from collections import Counter
 
 input = lambda: sys.stdin.readline().rstrip()
 
 
 def solve():
-    s = input()
+    s = map(int, input())
     k = int(input())
-    for i in range(len(s)):
-        if s[i] == "0":
-            break
-    seqs = [s[:i], s[i:]]
-    cnts = [Counter(seq) for seq in seqs]
-    for i, cnt in enumerate(cnts):
-        l = sum(cnt.values())
-        if k >= l - 1:
-            k -= l - 1
-            seqs[i] = min(cnt.keys())
+
+    queue = []
+    posqueue = []
+    zerocnt = [0]
+    for el in s:
+        while k > zerocnt[-1] and len(posqueue) > 0 and el < posqueue[-1]:
+            if el == 0 and len(posqueue) == 1:
+                break
+            while queue.pop() == 0:
+                k -= 1
+            zerocnt.pop()
+            posqueue.pop()
+            k -= 1
+        if el == 0:
+            zerocnt[-1] += 1
         else:
-            while k > 0 and l > 0:
-                mkey = max(cnt.keys())
-                val = cnt[mkey]
-                l -= min(val, k)
-                cnt[mkey] -= min(val, k)
-                k -= val
-            break
-    print(cnts[i])
-    cnt = Counter(seqs[i]) - cnts[i]
-    print(cnt)
-    newseq = []
-    for l in seqs[i]:
-        if cnt[l] == 0:
-            newseq.append(l)
-        else:
-            cnt[l] -= 1
-    seqs[i] = "".join(newseq)
-    sys.stdout.write("".join(seqs) + "\n")
+            zerocnt.append(0)
+            posqueue.append(el)
+        queue.append(el)
+
+    sys.stdout.write("".join(map(str, queue[: len(queue) - k])) + "\n")
 
 
 t = int(input())
